@@ -1,0 +1,310 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Task Manager</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fff56a, #fa76b8);
+      color: #0f0303;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+    }
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: rgba(7, 2, 2, 0.1);
+      padding: 25px;
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #180909;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .controls input, .controls select, .controls button {
+      padding: 10px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    .controls input, .controls select {
+      flex: 1;
+      min-width: 150px;
+    }
+    .controls button {
+      background: #ca71e6;
+      color: rgb(12, 3, 3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .controls button:hover {
+      background: #9d1ad1;
+      transform: scale(1.05);
+    }
+    .search-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .search-container input {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    .search-container button {
+      padding: 10px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #ca71e6;
+      color: rgb(12, 3, 3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .search-container button:hover {
+      background: #9d1ad1;
+      transform: scale(1.05);
+    }
+    .board {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .column {
+      flex: 1;
+      background: rgba(19, 18, 18, 0.15);
+      padding: 15px;
+      border-radius: 12px;
+      min-height: 350px;
+      backdrop-filter: blur(5px);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .column:hover {
+      transform: translateY(-3px);
+    }
+    .column h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #0e0c0c;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+    }
+    .task-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: rgba(19, 16, 16, 0.9);
+      border-radius: 8px;
+      cursor: grab;
+      font-weight: 500;
+      border-left: 6px solid transparent;
+      transition: all 0.2s ease-in-out;
+    }
+    .task:hover {
+      transform: scale(1.03);
+    }
+    .task.low { border-color: #2ecc71; }
+    .task.medium { border-color: #f39c12; }
+    .task.high { border-color: #e74c3c; }
+    .task-text {
+      flex-grow: 1;
+      margin-right: 10px;
+      color: #fff;
+    }
+    .task-delete {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .task-delete:hover {
+      color: #c0392b;
+    }
+    @media (max-width: 768px) {
+      .board {
+        flex-direction: column;
+      }
+      .controls, .search-container {
+        flex-direction: column;
+      }
+      .controls input, .controls select, .controls button, 
+      .search-container input, .search-container button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hi It's Ms. Kezaiah your Task Manager</h1>
+    <div class="controls">
+      <input type="text" id="task-input" placeholder="New task" />
+      <select id="priority-select">
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+      <button id="add-task-btn">Add Task</button>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="searchTasks" placeholder="Search tasks..." aria-label="Search Tasks">
+      <button id="search-btn">Search</button>
+    </div>
+
+    <div class="board">
+      <div class="column" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h2>To Do</h2>
+        <div class="task-container"></div>
+      </div>
+      <div class="column" id="in-progress" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h2>In Progress</h2>
+        <div class="task-container"></div>
+      </div>
+      <div class="column" id="done" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <h2>Done</h2>
+        <div class="task-container"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    let taskIdCounter = 0;
+
+    
+    function allowDrop(e) {
+      e.preventDefault();
+    }
+
+    
+    function drag(e) {
+      e.dataTransfer.setData("text/plain", e.target.id);
+    }
+
+    
+    function drop(e) {
+      e.preventDefault();
+      
+      const id = e.dataTransfer.getData("text/plain");
+      const task = document.getElementById(id);
+      
+      
+      const dropTarget = e.target.closest('.column');
+      if (dropTarget) {
+          const container = dropTarget.querySelector('.task-container');
+          container.appendChild(task);
+      }
+    }
+    
+    
+    function searchTasks() {
+      const searchValue = document.getElementById('searchTasks').value.toLowerCase();
+      
+      document.querySelectorAll('.task').forEach(task => {
+        
+        const taskText = task.querySelector('.task-text').textContent.toLowerCase();
+        
+        if (taskText.includes(searchValue)) {
+          task.style.display = 'flex'; 
+        } else {
+          task.style.display = 'none'; 
+        }
+      });
+    }
+
+    
+    function deleteTask(e) {
+      const taskToDelete = e.target.closest('.task');
+      if (taskToDelete) {
+        taskToDelete.remove();
+      }
+    }
+    
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        document.getElementById('add-task-btn').addEventListener('click', () => {
+            const input = document.getElementById('task-input');
+            const text = input.value.trim();
+            if (!text) return; 
+
+            const priority = document.getElementById('priority-select').value;
+
+            
+            const task = document.createElement('div');
+            const id = `task-${taskIdCounter++}`;
+            task.id = id;
+            task.className = `task ${priority}`;
+            task.draggable = true;
+            task.addEventListener('dragstart', drag);
+
+            
+            const taskText = document.createElement('span');
+            taskText.className = 'task-text';
+            taskText.textContent = text;
+
+            
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'task-delete';
+            deleteButton.textContent = '×'; 
+            deleteButton.addEventListener('click', deleteTask);
+
+            
+            task.appendChild(taskText);
+            task.appendChild(deleteButton);
+
+            
+            document.querySelector('#todo .task-container').appendChild(task);
+            input.value = ''; 
+        });
+        
+      
+        document.getElementById('task-input').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('add-task-btn').click();
+            }
+        });
+
+        
+        document.getElementById('search-btn').addEventListener('click', searchTasks);
+    });
+  </script>
+</body>
+</html>
